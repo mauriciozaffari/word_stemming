@@ -21,12 +21,12 @@ class Dictionary
       reject { |word| word.size <= 2 || stop_words.include?(word) }.
       map(&:stem).
       inject(Hash.new(0)) {|h,i| h[i] += 1; h }.
-      sort_by { |word, occurrences| occurrences }.to_h
+      sort_by { |word, occurrences| occurrences }.reverse.to_h
   end
 
   def scores(text)
     stems = stems(text)
-    max_stem_count = stems.to_a.last.last
+    max_stem_count = stems.values.first
     stems.inject({}) do |a, stem|
       score = (10.0 * stem.last / max_stem_count).round
       a.merge!({ stem.first => score }) if score > 0
