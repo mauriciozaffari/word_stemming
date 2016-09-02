@@ -1,7 +1,7 @@
 require 'active_support/inflector'
 require 'fast_stemmer'
 
-class Dictionary
+class WordStemming::Dictionary
   attr_accessor :text, :stems, :dictionary
 
   def initialize(text = "")
@@ -10,8 +10,12 @@ class Dictionary
     @dictionary = get_dictionary
   end
 
+  def match_score(description)
+    score(description) * 100 / max_score
+  end
+
   def match(description)
-    "#{score(description) * 100 / max_score}% match"
+    "#{match_score(description)}% match"
   end
 
   def add_to_dictionary(description)
@@ -23,7 +27,7 @@ class Dictionary
     def get_stems(text)
       return [] unless text.length > 0
 
-      stop_words = File.readlines('stopwords.txt').map(&:strip)
+      stop_words = File.readlines(File.dirname(__FILE__) + '/stopwords.txt').map(&:strip)
 
       ActiveSupport::Inflector.transliterate(text).
         downcase.
@@ -38,9 +42,12 @@ class Dictionary
     def get_dictionary
       return {} unless self.stems.length > 0
 
+      stems_count = self.stems.size
+      min_ocurrences = stems_count < 10 ? 1 : Math.log10(stems_count).floor
+
       stems = self.stems.
         inject(Hash.new(0)) {|h,i| h[i] += 1; h }.
-        reject { |word, occurrences| occurrences < 2 }.
+        reject { |word, occurrences| occurrences < min_ocurrences }.
         sort_by { |word, occurrences| occurrences }.reverse.to_h
 
       max_stem_count = stems.values.first

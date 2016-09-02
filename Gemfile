@@ -1,4 +1,4 @@
-source 'http://rubygems.org'
+source 'https://rubygems.org'
 
-gem 'fast-stemmer'
-gem 'activesupport'
+# Specify your gem's dependencies in word_stemming.gemspec
+gemspec
