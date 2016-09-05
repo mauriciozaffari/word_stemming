@@ -48,7 +48,10 @@ class WordStemming::Dictionary
       stems = self.stems.
         inject(Hash.new(0)) {|h,i| h[i] += 1; h }.
         reject { |word, occurrences| occurrences < min_ocurrences }.
-        sort_by { |word, occurrences| occurrences }.reverse.to_h
+        sort_by { |word, occurrences| occurrences }.reverse
+
+      # Array#to_h is only available on ruby > 2.1
+      stems = stems.respond_to?(:to_h) ? stems.to_h : Hash[*stems.flatten]
 
       max_stem_count = stems.values.first
       stems.inject({}) do |a, stem|
